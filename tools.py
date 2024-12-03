@@ -268,7 +268,7 @@ class Thumbnails():
                     raise Exception(f"Error al cargar la imagen {file} [{e}]")
 
 
-    def deploy_amplify_app(self, client, app_name, repository, branch, role_arn) -> str:
+    def deploy_amplify_app(self, client, app_name, repository, branch, role_arn, github_token) -> str:
         """
         Despliega una aplicación en AWS Amplify y retorna la URL de la aplicación.
 
@@ -286,7 +286,9 @@ class Thumbnails():
                 name=app_name,
                 repository=repository,
                 platform='WEB',
-                iamServiceRoleArn=role_arn
+                iamServiceRoleArn=role_arn,
+                oauthToken=github_token,
+
             )
 
             app_id = response['app']['appId']
