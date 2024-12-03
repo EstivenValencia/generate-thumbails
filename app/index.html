@@ -1,66 +1,80 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Visor de Imágenes S3</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        #imageSelect {
+            margin: 20px 0;
+            padding: 10px;
+            width: 300px;
+        }
+        #loadButton {
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #imageContainer {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 p-6">
-    <div class="max-w-xl mx-auto bg-white p-6 rounded-lg shadow-md">
-        <h1 class="text-2xl font-bold mb-4 text-center">Visor de Imágenes S3</h1>
-        
-        <form id="imageForm" class="mb-4">
-            <select id="imageSelect" class="w-full p-2 border rounded">
-                <option value="">Selecciona una imagen</option>
-            </select>
-        </form>
-
-        <div id="imageContainer" class="mt-4 text-center">
-            <img id="selectedImage" class="max-w-full max-h-[500px] mx-auto hidden" />
-        </div>
-    </div>
+<body>
+    <h1>Image Viewer</h1>
+    <button id="loadButton">Load Images</button>
+    <select id="imageSelect">
+        <option value="">Select an image</option>
+    </select>
+    <div id="imageContainer"></div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            const imageSelect = document.getElementById('imageSelect');
-            const selectedImage = document.getElementById('selectedImage');
+        const loadButton = document.getElementById('loadButton');
+        const imageSelect = document.getElementById('imageSelect');
+        const imageContainer = document.getElementById('imageContainer');
 
-            // Cargar lista de imágenes
+        loadButton.addEventListener('click', async () => {
             try {
                 const response = await fetch('/list-images');
-                const images = await response.json();
+                const data = await response.json();
                 
-                images.forEach(image => {
-                    const option = document.createElement('option');
-                    option.value = image;
-                    option.textContent = image;
-                    imageSelect.appendChild(option);
-                });
+                // Clear existing options
+                imageSelect.innerHTML = '<option value="">Select an image</option>';
+                
+                // Check if images array exists and is not empty
+                if (data.images && Array.isArray(data.images) && data.images.length > 0) {
+                    // Add new options
+                    data.images.forEach(imageName => {
+                        const option = document.createElement('option');
+                        option.value = imageName;
+                        option.textContent = imageName;
+                        imageSelect.appendChild(option);
+                    });
+                } else {
+                    console.log("No images found or invalid response format");
+                    imageSelect.innerHTML += '<option value="">No images available</option>';
+                }
             } catch (error) {
-                console.error('Error cargando imágenes:', error);
+                console.error('Error loading images:', error);
             }
+        });
 
-            // Evento de selección de imagen
-            imageSelect.addEventListener('change', async (event) => {
-                const imageName = event.target.value;
-                
-                if (!imageName) {
-                    selectedImage.classList.add('hidden');
-                    return;
-                }
-
-                try {
-                    const response = await fetch(`/get-image/${imageName}`);
-                    const blob = await response.blob();
-                    const imageUrl = URL.createObjectURL(blob);
-                    
-                    selectedImage.src = imageUrl;
-                    selectedImage.classList.remove('hidden');
-                } catch (error) {
-                    console.error('Error cargando imagen:', error);
-                    selectedImage.classList.add('hidden');
-                }
-            });
+        imageSelect.addEventListener('change', async (event) => {
+            const selectedImage = event.target.value;
+            if (selectedImage) {
+                imageContainer.innerHTML = `<img src="/get-image/${selectedImage}" alt="${selectedImage}" style="max-width: 100%; height: auto;">`;
+            } else {
+                imageContainer.innerHTML = '';
+            }
         });
     </script>
 </body>

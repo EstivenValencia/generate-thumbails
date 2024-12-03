@@ -1,8 +1,14 @@
 from tools import Thumbnails
-from config import *
+from app.config import *
+from time import sleep
 
 if __name__ == "__main__":
+    #sleep(60)
     thumbnail = Thumbnails(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN, AWS_REGION)
+    # Creacion de la tabla DynamoDB
+    dynamo_client = thumbnail.create_client('dynamodb')
+    thumbnail.create_table_dianamodb(dynamo_client, TABLE_NAME)  # Se crea la tabla para almacenar los metadatos de las miniaturas
+    sleep(10) # Seespera 10 segundos para iniciar la tabla
 
     # Creacion de los buckets
     s3_client = thumbnail.create_client('s3')  # Se crea el cliente de s3
@@ -18,9 +24,15 @@ if __name__ == "__main__":
     lambda_client = thumbnail.create_client('lambda')
     thumbnail.deploy_lambda_fuction(lambda_client, LAMBDA_FOLDER_PATH, FUNCTION_NAME, ROLE_ARN, timeout=30, memory_size=500)  # Se crea la función lambda
 
+<<<<<<< HEAD
     # Creacion de la tabla DynamoDB
     dynamo_client = thumbnail.create_client('dynamodb')
     thumbnail.create_table_dianamodb(dynamo_client, TABLE_NAME)  # Se crea la tabla para almacenar los metadatos de las miniaturas
+=======
+    # Desplegar aplciacion web para visualizacion
+    amplify_client = thumbnail.create_client('amplify')
+    thumbnail.deploy_amplify_app(amplify_client, 'thumbnails-app', URL_REPOSITORY, 'main', ROLE_ARN, GITHUB_ACCESS_TOKEN)  # Se despliega la aplicacion web en Amplify
+>>>>>>> fadc36c (version 3.0)
 
     # Carga de imagenes y mensajes a SQS
     thumbnail.upload_folder_images(s3_client, BUCKET_MEDIA_IMAGES, FOLDER_PATH)

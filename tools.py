@@ -181,7 +181,7 @@ class Thumbnails():
         except Exception as e:
             raise Exception(f"Error al comprimir lambda_function.zip: {e}")
 
-    def add_sqs_trigger_to_lambda(self, client, function_name):
+    def add_sqs_trigger_to_lambda(self, client, function_name) -> None:
         """
         Configura un trigger SQS para una función Lambda.
         
@@ -191,14 +191,14 @@ class Thumbnails():
         """
         try:
             client.create_event_source_mapping(
-                EventSourceArn=self.queue_arn,  
+                EventSourceArn= self.queue_arn,  
                 FunctionName=function_name,  
                 Enabled=True, 
                 BatchSize=3,
             )
             print(f"Cola SQS configurada como trigger para la función Lambda '{function_name}'")
         except client.exceptions.ClientError as e:
-            print("El trigger de SQS ya existe")
+            print(f"El trigger de SQS ya existe {e}")
 
     def deploy_lambda_fuction(self, client, folder_path, function_name, role_arn, timeout=30, memory_size=128):
         """

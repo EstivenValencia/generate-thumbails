@@ -1,5 +1,5 @@
 import boto3
-from config import *
+from app.config import *
 
 # Crear cliente de DynamoDB
 dynamodb = boto3.client('dynamodb',

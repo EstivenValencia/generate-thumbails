@@ -14,6 +14,7 @@ s3_client = boto3.client(
     's3', 
     aws_access_key_id=AWS_ACCESS_KEY_ID,
     aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+    aws_session_token=AWS_SESSION_TOKEN,
     region_name=AWS_REGION
 )
 
@@ -26,34 +27,37 @@ async def serve_html():
 @app.get("/list-images")
 async def list_images():
     try:
-        # Lista solo los nombres de objetos, no descarga las imágenes
-        response = s3_client.list_objects_v2(Bucket=BUCKET_THUMBNAILS)
-        
-        # Extrae solo los nombres de los archivos que son imágenes
-        image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp']
-        images = [
-            obj['Key'] for obj in response.get('Contents', []) 
-            if any(obj['Key'].lower().endswith(ext) for ext in image_extensions)
-        ]
-        
-        return images
+        images = []
+        paginator = s3_client.get_paginator('list_objects_v2')
+        pages = paginator.paginate(Bucket=BUCKET_THUMBNAILS)
+        print(pages)
+        for page in pages:
+            print(page)
+            if 'Contents' in page:
+                for obj in page['Contents']:
+                    if obj['Key'].lower().endswith(('.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp')):
+                        images.append(obj['Key'])
+
+        if not images:
+            return {"message": "No se encontraron imágenes en el bucket", "images": []}
+
+        return {"images": images}
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error inesperado: {str(e)}")
 
 @app.get("/get-image/{image_name}")
 async def get_image(image_name: str):
     try:
-        # Descarga la imagen específica solicitada
         response = s3_client.get_object(Bucket=BUCKET_THUMBNAILS, Key=image_name)
-        
-        # Devuelve la imagen como un flujo de bytes
         return StreamingResponse(
             io.BytesIO(response['Body'].read()), 
             media_type=response['ContentType']
         )
     except Exception as e:
         raise HTTPException(status_code=404, detail=f"Imagen no encontrada: {str(e)}")
-    
+
 if __name__ == "__main__":
     uvicorn.run(
         "main:app", 

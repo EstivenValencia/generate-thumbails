@@ -11,7 +11,7 @@ dynamodb = boto3.resource('dynamodb')
 
 size_resize = (100,100)
 destination_bucket = 'thumnails-storage'
-table_name = 'metada_thumbnails'
+table_name = 'metadata_thumbnails'
 
 def send_metada_to_dynamo(metada):
     """

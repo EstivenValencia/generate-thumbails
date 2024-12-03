@@ -10,6 +10,7 @@ FOLDER_PATH = 'images'
 # Variables para almacenamiento en S3
 BUCKET_THUMBNAILS = 'thumnails-storage'
 BUCKET_MEDIA_IMAGES = 'media-images-storage'
+BUCKET_WEB = 'web-thumbnails'
 
 # Variables de la funcion lambda y asociacion
 LAMBDA_FOLDER_PATH = 'lambda'
@@ -18,3 +19,7 @@ ROLE_ARN = 'arn:aws:iam::355629662964:role/LabRole'  # Se utiliza el rol lab de 
 
 # Variables de la tabla DynamoDB
 TABLE_NAME = 'metadata_thumbnails'
+
+# Repositorio de githu para despliegue de amplify
+URL_REPOSITORY = 'https://github.com/EstivenValencia/generate-thumbails.git'
+GITHUB_ACCESS_TOKEN = ''
