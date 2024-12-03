@@ -1,4 +1,4 @@
-# Proyecto Thumbnails en AWS
+# Proyecto Thumbnails en AWS 
 
 Esta documentación describe cómo ejecutar el proyecto de generación de thumbnails en AWS.
 
