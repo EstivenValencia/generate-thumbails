@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Visor de Imágenes S3</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+    <div class="max-w-xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        <h1 class="text-2xl font-bold mb-4 text-center">Visor de Imágenes S3</h1>
+        
+        <form id="imageForm" class="mb-4">
+            <select id="imageSelect" class="w-full p-2 border rounded">
+                <option value="">Selecciona una imagen</option>
+            </select>
+        </form>
+
+        <div id="imageContainer" class="mt-4 text-center">
+            <img id="selectedImage" class="max-w-full max-h-[500px] mx-auto hidden" />
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const imageSelect = document.getElementById('imageSelect');
+            const selectedImage = document.getElementById('selectedImage');
+
+            // Cargar lista de imágenes
+            try {
+                const response = await fetch('/list-images');
+                const images = await response.json();
+                
+                images.forEach(image => {
+                    const option = document.createElement('option');
+                    option.value = image;
+                    option.textContent = image;
+                    imageSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error cargando imágenes:', error);
+            }
+
+            // Evento de selección de imagen
+            imageSelect.addEventListener('change', async (event) => {
+                const imageName = event.target.value;
+                
+                if (!imageName) {
+                    selectedImage.classList.add('hidden');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/get-image/${imageName}`);
+                    const blob = await response.blob();
+                    const imageUrl = URL.createObjectURL(blob);
+                    
+                    selectedImage.src = imageUrl;
+                    selectedImage.classList.remove('hidden');
+                } catch (error) {
+                    console.error('Error cargando imagen:', error);
+                    selectedImage.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
